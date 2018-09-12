@@ -17,6 +17,7 @@ git open [remote] [branch]
 
   Available options are
 i,issue!      open issues page
+p,pull-request!           open pull request page
 "
 
 # https://github.com/koalaman/shellcheck/wiki/SC1090
@@ -25,11 +26,13 @@ SUBDIRECTORY_OK='Yes' . "$(git --exec-path)/git-sh-setup"
 
 # Defaults
 is_issue=0
+is_pr=0
 protocol="https"
 
 while test $# != 0; do
   case "$1" in
   --issue) is_issue=1;;
+  --pull-request) is_pr=1;;
   --) shift; break ;;
   esac
   shift
@@ -222,10 +225,15 @@ fi
 
 openurl="$protocol://$domain/$urlpath"
 
-# simplify URL for master
-if [[ $branch != "master" ]]; then
+
+if (( is_pr )); then
+    target="master"
+    openurl="$openurl/pull/new/$target...$branch"
+elif [[ $branch != "master" ]]; then
     openurl="$openurl$providerBranchRef"
 fi
+
+echo $openurl
 
 # get current open browser command
 case $( uname -s ) in
